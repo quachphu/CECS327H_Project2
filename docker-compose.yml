@@ -1,0 +1,72 @@
+# docker-compose.yml - Anycast TCP Simulation (Task 1)
+# CECS 327 - Project 2: A Bite of Distributed Communication
+#
+# Architecture:
+#   3 server containers (server1, server2, server3) all share the same
+#   network alias "server". When the client resolves "server" via Docker
+#   DNS, it gets one of the three container IPs in round-robin fashion,
+#   simulating Anycast where multiple hosts share a single address.
+#
+# Usage:
+#   docker-compose up --build
+#
+# To run the client again after it exits:
+#   docker-compose run client
+
+version: "3.8"
+
+services:
+  # --- Server instances ---
+  # Each server has a unique SERVER_NAME but shares the network alias
+  # "server" so Docker DNS load-balances client connections across them.
+
+  server1:
+    build: .
+    command: python server.py
+    environment:
+      - SERVER_NAME=server1
+    networks:
+      anycast_net:
+        aliases:
+          - server   # Shared alias for Anycast simulation
+
+  server2:
+    build: .
+    command: python server.py
+    environment:
+      - SERVER_NAME=server2
+    networks:
+      anycast_net:
+        aliases:
+          - server   # Same alias — Docker DNS round-robins between all three
+
+  server3:
+    build: .
+    command: python server.py
+    environment:
+      - SERVER_NAME=server3
+    networks:
+      anycast_net:
+        aliases:
+          - server   # Same alias
+
+  # --- Client ---
+  # Connects to hostname "server" which Docker DNS resolves to one of
+  # the three server containers above.
+  client:
+    build: .
+    command: python client.py
+    depends_on:
+      - server1
+      - server2
+      - server3
+    networks:
+      - anycast_net
+
+# Custom bridge network for all containers
+networks:
+  anycast_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16   # Fixed subnet for predictable tcpdump output
