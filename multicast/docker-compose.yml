@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  # Temperature sensor 
+  sender1:
+    build: .
+    command: python multicast_sender.py
+    environment:
+      - SENSOR_TYPE=temp
+    networks:
+      - multicast_net
+    depends_on:
+      - receiver1
+      - receiver2
+      - receiver3
+
+  # Humidity sensor (multi-source multicast) 
+  sender2:
+    build: .
+    command: python multicast_sender.py
+    environment:
+      - SENSOR_TYPE=humidity
+    networks:
+      - multicast_net
+    depends_on:
+      - receiver1
+      - receiver2
+      - receiver3
+
+  # Receivers : Each receiver joins the multicast group for a limited duration. 
+  receiver1:
+    build: .
+    command: python multicast_receiver.py --duration 20
+    networks:
+      - multicast_net
+
+  receiver2:
+    build: .
+    command: python multicast_receiver.py --duration 15
+    networks:
+      - multicast_net
+
+  receiver3:
+    build: .
+    command: python multicast_receiver.py --duration 10
+    networks:
+      - multicast_net
+
+networks:
+  multicast_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16   
