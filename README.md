@@ -19,7 +19,7 @@
 ### Build and Run
 
 ```bash
-cd task1
+cd anycast
 docker-compose up --build
 ```
 
@@ -33,22 +33,39 @@ docker-compose run client
 
 ### Monitor Traffic with tcpdump
 
-1. Find a running container ID:
+1. In a new terminal:
 
    ```bash
+   cd anycast
    docker ps
    ```
 
-2. Install tcpdump inside a server container:
+2. Back in first terminal, install tcpdump inside a server container:
 
    ```bash
    docker exec -it <container_id> apt-get update && apt-get install -y tcpdump
    ```
 
+   If issues running above command on Mac, try:
+
+   ```bash
+   docker exec -it <container_id> sh -c "apt-get update && apt-get install -y tcpdump"
+   ```
+
 3. Capture TCP traffic on port 5000:
+
    ```bash
    docker exec -it <container_id> tcpdump -i eth0 tcp port 5000
    ```
+
+4. In a second terminal, run:
+   ```bash
+    docker compose run client
+   ```
+
+This spins up a separate client container instance, simulating a second
+independent client sending UDP packets to the server. You should see
+tcpdump in Terminal 1 capture traffic from both clients simultaneously.
 
 ### Expected Output
 
@@ -81,7 +98,7 @@ docker-compose down
 ### Build and Run
 
 ```bash
-cd task2
+cd multicast
 docker-compose up --build
 ```
 
