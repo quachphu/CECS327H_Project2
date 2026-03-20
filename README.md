@@ -1,8 +1,7 @@
-# CECS327H_Project2
+# CECS 327 – Intro to Networks and Distributed Computing
 
 # Project 2: A Bite of Distributed Communication
 
-## CECS 327 – Intro to Networks and Distributed Computing
 
 ---
 
